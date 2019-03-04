@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('createComponent', (uri) => {
+	let disposableComponentCommand = vscode.commands.registerCommand('createComponent', (uri) => {
 		// The code you place here will be executed every time your command is executed
 		if (typeof uri === 'undefined') {
 			if (vscode.window.activeTextEditor) {
@@ -32,8 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const box = vscode.window.createInputBox();
 		box.show();
 		box.onDidAccept(() => {
-			console.log(box.value);
-
 			box.hide();
 			terminal.show();
 			uri = path.normalize(folderPath);
@@ -41,10 +39,34 @@ export function activate(context: vscode.ExtensionContext) {
 			terminal.sendText(`cd ${uri}`);
 			terminal.sendText(`ng g c ${box.value}`);
 		});
-		
 	});
 
-	context.subscriptions.push(disposable);
+	let disposableModuleCommand = vscode.commands.registerCommand('createModule', (uri) => {
+		// The code you place here will be executed every time your command is executed
+		if (typeof uri === 'undefined') {
+			if (vscode.window.activeTextEditor) {
+				uri = vscode.window.activeTextEditor.document.uri;
+			}
+		}
+		if (!uri) {
+			return;
+		}
+		var folderPath = vscode.workspace.asRelativePath(uri);
+		folderPath = folderPath.replace(/\\/g, '/');
+		const box = vscode.window.createInputBox();
+		box.show();
+		box.onDidAccept(() => {
+			box.hide();
+			terminal.show();
+			uri = path.normalize(folderPath);
+			terminal.sendText(`cd ${workspacePath}`);
+			terminal.sendText(`cd ${uri}`);
+			terminal.sendText(`ng g m ${box.value}`);
+		});
+	});
+
+	context.subscriptions.push(disposableComponentCommand);
+	context.subscriptions.push(disposableModuleCommand);
 }
 
 // this method is called when your extension is deactivated
